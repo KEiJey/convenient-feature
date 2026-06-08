@@ -50,7 +50,11 @@ def choose_target_name(title: str, extension: str, target_dir: Path) -> Path:
 def copy_with_title(origin_dir: Path, result_dir: Path) -> int:
     result_dir.mkdir(parents=True, exist_ok=True)
     count = 0
-    for path in sorted(origin_dir.glob("*.m4a")):
+    allowed_exts = {".m4a", ".mp4"}
+    for path in sorted(origin_dir.iterdir()):
+        if not path.is_file() or path.suffix.lower() not in allowed_exts:
+            continue
+
         try:
             title = get_title(path)
         except Exception as exc:
@@ -78,9 +82,9 @@ def copy_with_title(origin_dir: Path, result_dir: Path) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Copy M4A files from origin to result using title metadata as the file name."
+        description="Copy M4A/MP4 files from origin to result using title metadata as the file name."
     )
-    parser.add_argument("--origin", default="origin", help="Source directory containing .m4a files")
+    parser.add_argument("--origin", default="origin", help="Source directory containing .m4a and .mp4 files")
     parser.add_argument("--result", default="result", help="Destination directory")
     args = parser.parse_args()
 
