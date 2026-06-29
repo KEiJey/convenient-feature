@@ -38,6 +38,23 @@ def get_title(path: Path) -> str | None:
                 return value.strip()
     return None
 
+def get_album(path: Path) -> str | None:
+    tags = MP4(str(path))
+    if tags.tags is None:
+        return None
+
+    album_keys = ["\xa9alb", "©alb", "album"]
+    for key in album_keys:
+        if key in tags.tags:
+            value = tags.tags[key]
+            if isinstance(value, list):
+                value = value[0] if value else None
+            if isinstance(value, bytes):
+                value = value.decode(errors="ignore")
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+    return None
+
 def choose_target_name(title: str, extension: str, target_dir: Path) -> Path:
     base = sanitize_filename(title)
     candidate = target_dir / f"{base}{extension}"
