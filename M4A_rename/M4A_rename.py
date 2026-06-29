@@ -84,6 +84,46 @@ def choose_target_name(title: str, extension: str, target_dir: Path) -> Path:
         counter += 1
     return candidate
 
+def count_files_by_album(origin_dir: Path) -> dict[str, int]:
+    """Count the number of files for each album."""
+    album_counts = {}
+    allowed_exts = {".m4a", ".mp4"}
+    
+    for path in origin_dir.iterdir():
+        if not path.is_file() or path.suffix.lower() not in allowed_exts:
+            continue
+        
+        try:
+            album = get_album(path) or "Unknown Album"
+        except Exception:
+            album = "Unknown Album"
+        
+        album_counts[album] = album_counts.get(album, 0) + 1
+    
+    return album_counts
+
+def count_discs_by_album(origin_dir: Path) -> dict[str, set[str]]:
+    """Count unique discs for each album."""
+    album_discs = {}
+    allowed_exts = {".m4a", ".mp4"}
+    
+    for path in origin_dir.iterdir():
+        if not path.is_file() or path.suffix.lower() not in allowed_exts:
+            continue
+        
+        try:
+            album = get_album(path) or "Unknown Album"
+            disc = get_disc(path) or "1"
+        except Exception:
+            album = "Unknown Album"
+            disc = "1"
+        
+        if album not in album_discs:
+            album_discs[album] = set()
+        album_discs[album].add(disc)
+    
+    return album_discs
+
 def copy_with_title(origin_dir: Path, result_dir: Path) -> int:
     result_dir.mkdir(parents=True, exist_ok=True)
     count = 0
