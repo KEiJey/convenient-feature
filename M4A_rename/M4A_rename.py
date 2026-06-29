@@ -55,6 +55,26 @@ def get_album(path: Path) -> str | None:
                 return value.strip()
     return None
 
+def get_disc(path: Path) -> str | None:
+    tags = MP4(str(path))
+    if tags.tags is None:
+        return None
+
+    disc_keys = ["\xa9dsk", "©dsk", "disk", "disc"]
+    for key in disc_keys:
+        if key in tags.tags:
+            value = tags.tags[key]
+            if isinstance(value, list):
+                value = value[0] if value else None
+            if isinstance(value, bytes):
+                value = value.decode(errors="ignore")
+            # Extract just the disc number (e.g., "1/1" -> "1")
+            if isinstance(value, str) and value.strip():
+                disc_num = value.split('/')[0].strip()
+                if disc_num:
+                    return disc_num
+    return None
+
 def choose_target_name(title: str, extension: str, target_dir: Path) -> Path:
     base = sanitize_filename(title)
     candidate = target_dir / f"{base}{extension}"
