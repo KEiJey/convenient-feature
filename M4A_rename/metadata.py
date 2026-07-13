@@ -52,10 +52,17 @@ def get_disc(path: Path) -> str | None:
     for key in disc_keys:
         if key in tags.tags:
             value = tags.tags[key]
-            if isinstance(value, list):
-                value = value[0] if value else None
+
+            while isinstance(value, (list, tuple)) and value:
+                value = value[0]
+
             if isinstance(value, bytes):
                 value = value.decode(errors="ignore")
+            if isinstance(value, tuple) and value:
+                value = value[0]
+            if isinstance(value, int):
+                return str(value)
+
             # Extract just the disc number (e.g., "1/1" -> "1")
             if isinstance(value, str) and value.strip():
                 disc_num = value.split('/')[0].strip()
